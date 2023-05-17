@@ -6,10 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-<de.hsos.cp.newminesweeper.MyView
-    android:id="@+id/MyView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    />
+    <include
+        android:id="@+id/my_view"
+        layout="@layout/spielfeld"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="-16dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
