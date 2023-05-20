@@ -20,14 +20,10 @@ public class MainActivity extends AppCompatActivity {
         //System.out.println("Welche Groesse soll das Spielfeld haben?");
        // int groesse = scanner.nextInt();
         //LinearLayout layout = new LinearLayout(this);
-        //layout.addView(spielfeld.getImageView());
-
+        spielfeld.verteileMinen();
         setContentView(R.layout.activity_main);
-        spielfeld = findViewById(R.id.my_view);
 
-        spielfeld.init(this);
-        spielfeld.erstelleSpielfeld();
-        spielfeld.getCanvas().drawBitmap(spielfeld.getBitmap(),spielfeld.getLeft(),spielfeld.getTop(),spielfeld.getPaint());
+
         //spielfeld.getCanvas().drawColor(Color.GRAY);
     }
 }

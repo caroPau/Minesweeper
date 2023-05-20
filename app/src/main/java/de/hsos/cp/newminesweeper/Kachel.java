@@ -1,20 +1,28 @@
 package de.hsos.cp.newminesweeper;
 
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
-import android.widget.ToggleButton;
+import android.view.View;
 
-public class Kachel {
+public class Kachel{
     private int xPos = 0;
     private int yPos = 0;
+
+    Spielfeld spielfeld;
     private Rect button;
 
     private boolean istMine = false;
     private boolean wurdeAufgedeckt = false;
     private int anzahlMinenNachbarn = 0;
 
-    public Kachel(boolean istMine){
+    public Kachel( boolean istMine, Spielfeld spielfeld){
         this.istMine = istMine;
+        this.spielfeld = spielfeld;
     }
+
 
     public Rect getButton() {
         return button;
@@ -58,7 +66,7 @@ public class Kachel {
 
     private void entmarkierenAlsMine(){}
 
-     Rect button(Spielfeld spielfeld){
+     Rect button(){
         return button = new Rect(this.xPos, this.yPos, this.xPos + spielfeld.kachelbreite(), this.yPos + spielfeld.kachelbreite());
     }
 }
