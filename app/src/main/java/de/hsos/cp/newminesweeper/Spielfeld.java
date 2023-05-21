@@ -3,6 +3,7 @@ package de.hsos.cp.newminesweeper;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -21,6 +22,8 @@ public class Spielfeld extends View {
     private Kachel kacheln[][];
     private Paint paint = new Paint();
 
+    private Context context;
+
 
     public static int getBildschirmBreite() {
         return Resources.getSystem().getDisplayMetrics().widthPixels;
@@ -32,6 +35,7 @@ public class Spielfeld extends View {
 
     public Spielfeld(Context context){
         super(context);
+        this.context = context;
         init();
     }
     public Spielfeld(Context context, AttributeSet attributeSet){
@@ -40,7 +44,7 @@ public class Spielfeld extends View {
     }
 
     int kachelbreite(){
-        return getBildschirmBreite()/kacheln.length;
+        return getBildschirmBreite()/kacheln[0].length;
     }
 
     public void verteileMinen(){
@@ -58,13 +62,13 @@ public class Spielfeld extends View {
     }
 
     public void init(){
-        this.kacheln = new Kachel[20][20];
-        for(int i=0; i<=19;++i){
+        this.kacheln = new Kachel[40][20];
+        for(int i=0; i<=39;++i){
             for(int j=0; j<=19;++j){
                 kacheln[i][j] = new Kachel(false, this);
-                kacheln[i][j].setxPos(j*(kachelbreite()+10));
-                kacheln[i][j].setyPos(i*(kachelbreite()+10));
-                kacheln[i][j].button();
+                kacheln[i][j].setxPos(j*(kachelbreite()));
+                kacheln[i][j].setyPos(i*(kachelbreite()));
+                kacheln[i][j].setBitmap_hidden(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.kachel),kachelbreite(),kachelbreite(),true));
             }
         }
     }
@@ -76,9 +80,9 @@ public class Spielfeld extends View {
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.FILL);
         if(kacheln.length!=0) {
-            for (int i = 0; i <= 19; ++i) {
+            for (int i = 0; i <= 39; ++i) {
                 for (int j = 0; j <= 19; ++j) {
-                    canvas.drawRect(this.kacheln[i][j].getButton(), paint);
+                    canvas.drawBitmap(kacheln[i][j].getBitmap(),kacheln[i][j].getxPos(),kacheln[i][j].getyPos(),paint);
                 }
             }
         }
