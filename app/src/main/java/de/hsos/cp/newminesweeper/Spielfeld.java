@@ -23,10 +23,14 @@ public class Spielfeld extends View {
 
     /* Matrix mit Kachelobjekten*/
     private Kachel [][] kacheln;
+
+    private Bar bar;
     /* Paint objekt für die onDraw()-Methode*/
     private Paint paint = new Paint();
 
     private final int MINEN = 20;
+
+    private int minenleft = MINEN;
 
     /* onClickListener, um Clicks zu verarbeiten*/
     private OnClickListener onClickListener;
@@ -245,6 +249,21 @@ public class Spielfeld extends View {
     /* Initialisierung des Spielfeldes
      *  -> es werden Kachelobjekte angelegt und initialisiert*/
     public void init() {
+        /* Initialisierung Bar */
+        bar = new Bar(getContext());
+        bar.getBombCountView().setText(Integer.toString(minenleft));
+        bar.setxPosBombCount(0);
+        bar.setyPosBombCount(0);
+        bar.setxPosTimer((int)(getBildschirmBreite()*0.65));
+        bar.setyPosTimer(0);
+        bar.setxPosNewGame((int)(getBildschirmBreite()*0.4));
+        bar.setyPosNewGame((int)(getBildschirmHoehe()*0.026));
+        bar.setBitmap_BombCount(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), (int)(getBildschirmHoehe()*0.18), (int)(getBildschirmHoehe()*0.15), true));
+        bar.setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.newgame), (int)(getBildschirmHoehe()*0.1), (int)(getBildschirmHoehe()*0.1), true));
+        bar.setBitmap_Background(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), getBildschirmBreite(), (int)(getBildschirmHoehe()*0.15), true));
+        bar.setBitmap_Timer(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), (int)(getBildschirmHoehe()*0.18), (int)(getBildschirmHoehe()*0.15), true));
+
+        /* Initialisierung Kacheln */
         kacheln = new Kachel[KachelSpalten][KachelZeilen];
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
@@ -256,8 +275,6 @@ public class Spielfeld extends View {
             }
         }
         setMinen();
-      //  Kachel[] minen = minenfelder(kacheln);
-       // setzeMinen(kacheln, minen);
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
                 if (kacheln[x][y].isMine()) {
@@ -310,11 +327,17 @@ public class Spielfeld extends View {
         super.onDraw(canvas);
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize((int)(getBildschirmHoehe()*0.075));
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
                 canvas.drawBitmap(kacheln[x][y].getBitmap(), kacheln[x][y].getxPos(), kacheln[x][y].getyPos(), paint);
             }
         }
+        canvas.drawBitmap(bar.getBitmap_Background(), 0, 0, paint);
+        canvas.drawBitmap(bar.getBitmap_NewGame(), bar.getxPosNewGame(), bar.getyPosNewGame(), paint);
+        canvas.drawBitmap(bar.getBitmap_BombCount(), bar.getxPosBombCount(), bar.getyPosBombCount(), paint);
+        canvas.drawBitmap(bar.getBitmap_Timer(), bar.getxPosTimer(), bar.getyPosTimer(), paint);
+        canvas.drawText(bar.getBombCountView().getText().toString(),(int)(getBildschirmBreite()*0.095),(int)(getBildschirmHoehe()*0.098),paint);
     }
 
     /* Methoden, um den OnClickListener zu unterstützen*/
@@ -333,6 +356,7 @@ public class Spielfeld extends View {
     /* Event, das die Toucheingabe verwaltet */
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
+
         if (action == MotionEvent.ACTION_DOWN) {
             startTimer();
             actionDownHappened = true;
@@ -349,6 +373,10 @@ public class Spielfeld extends View {
             if (getClickedKachel(kacheln, clickXPos, clickYPos) != null) {
                 if (!getClickedKachel(kacheln, clickXPos, clickYPos).isFlag()) {
                     getClickedKachel(kacheln, clickXPos, clickYPos).setWurdeAufgedeckt(true);
+                    if(getClickedKachel(kacheln, clickXPos, clickYPos).isMine()) {
+                        bar.getBombCountView().setText(Integer.toString(minenleft));
+                        minenleft--;
+                    }
                 } else {
                     getClickedKachel(kacheln, clickXPos, clickYPos).setFlag(false);
                 }
