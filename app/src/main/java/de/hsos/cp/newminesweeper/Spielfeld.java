@@ -151,7 +151,12 @@ public class Spielfeld extends View {
             stopTimer();
             actionDownHappened = false;
             if(getClickedKachel(kacheln,clickXPos,clickYPos)!=null) {
-                getClickedKachel(kacheln, clickXPos, clickYPos).setWurdeAufgedeckt(true);
+                if(!getClickedKachel(kacheln, clickXPos, clickYPos).isFlag()) {
+                    getClickedKachel(kacheln, clickXPos, clickYPos).setWurdeAufgedeckt(true);
+                }
+                else{
+                    getClickedKachel(kacheln, clickXPos, clickYPos).setFlag(false);
+                }
                 invalidate();
             }
         }
