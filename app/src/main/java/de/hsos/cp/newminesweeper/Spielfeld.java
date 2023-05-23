@@ -10,13 +10,14 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-
+import android.os.CountDownTimer;
 
 import java.util.Random;
 
 /* Spielfeld-Klasse
 *  Custom View, auf dem die Kacheln abgebildet werden
-*  enthält eine Kachelmatrix und Funktionen zum initialisieren des Spielfelds*/
+*  enthält eine Kachelmatrix und Funktionen zum initialisieren des Spielfelds
+*  zudem wird das TouchEvent und der onClick verarbeitet */
 public class Spielfeld extends View {
 
     /* Matrix mit Kachelobjekten*/
@@ -27,11 +28,24 @@ public class Spielfeld extends View {
     /* onClickListener, um Clicks zu verarbeiten*/
     private OnClickListener onClickListener;
 
+    private CountDownTimer countDownTimer;
+
+    private boolean timerRunning = false;
+
+    private boolean actionDownHappened = false;
+
+    private long timeRemaining;
+
+    private float clickXPos;
+
+    private float clickYPos;
+
     /* Variablen für die Größe des Kachelfelds */
 
     private int KachelZeilen = 19;
 
     private int KachelSpalten = 10;
+
 
     /* Gibt die Bildschirmbreite in Pixeln zurück*/
     public static int getBildschirmBreite() {
@@ -44,13 +58,15 @@ public class Spielfeld extends View {
     /* Defaultkonstruktor */
     public Spielfeld(Context context){
         super(context);
+        initializeTimer(); //Initialisierung des Timers
         init(); //Initialisierung des Spielfelds
-        verteileMinen();
+        verteileMinen(); //Minen verteilen
     }
     public Spielfeld(Context context, AttributeSet attributeSet){
         super(context, attributeSet);
+        initializeTimer();
         init(); //Initialisierung des Spielfelds
-        verteileMinen();
+        verteileMinen(); //Minen verteilen
     }
 
     int kachelbreite(){
@@ -80,7 +96,7 @@ public class Spielfeld extends View {
                 kacheln[i][j].setxPos(j*(kachelbreite()));
                 kacheln[i][j].setyPos(i*(kachelbreite()));
                 kacheln[i][j].setBitmap_hidden(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(),R.drawable.kachel),kachelbreite(),kachelbreite(),true));
-                kacheln[i][j].setBitmap_flag(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(),R.drawable.kachel),kachelbreite(),kachelbreite(),true));
+                kacheln[i][j].setBitmap_flag(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(),R.drawable.flag),kachelbreite(),kachelbreite(),true));
                 /*TODO: Randomisieren von anzahlMinenNachbarn und abhängig von der Zahl ein anderes Bitmap zeichnen*/
                 kacheln[i][j].setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(),R.drawable.exposed_1),kachelbreite(),kachelbreite(),true));
             }
@@ -120,21 +136,35 @@ public class Spielfeld extends View {
 
     /* Event, das die Toucheingabe verwaltet */
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                // Koordinaten des Klicks abrufen
-                float x = event.getX(); //X-Koordinate des Klicks
-                float y = event.getY(); //Y-Koordinate des Klicks
-                if(getClickedKachel(kacheln, x, y)!=null) {
-                    getClickedKachel(kacheln, x, y).setWurdeAufgedeckt(true); //Angeklickte Kachel auf Aufgedeckt setzen
-                    invalidate(); //Befehl, um das Ausführen der onDraw Methode zu erzwingen und neuzuzeichnen
-                }
-                    if (onClickListener != null) {
-                    onClickListener.onClick(this, x, y); // Koordinaten an den OnClickListener übergeben
-                }
-                break;
+        int action = event.getAction();
+        if(action == MotionEvent.ACTION_DOWN){
+            startTimer();
+            actionDownHappened = true;
+            // Koordinaten des Klicks abrufen
+            clickXPos = event.getX(); //X-Koordinate des Klicks
+            clickYPos = event.getY(); //Y-Koordinate des Klicks
+            if (onClickListener != null) {
+                onClickListener.onClick(this, clickXPos, clickYPos); // Koordinaten an den OnClickListener übergeben
+            }
         }
-        return super.onTouchEvent(event);
+        if(action == MotionEvent.ACTION_UP && timerRunning) {
+            stopTimer();
+            actionDownHappened = false;
+            if(getClickedKachel(kacheln,clickXPos,clickYPos)!=null) {
+                getClickedKachel(kacheln, clickXPos, clickYPos).setWurdeAufgedeckt(true);
+                invalidate();
+            }
+        }
+        if (actionDownHappened && !timerRunning) {
+            actionDownHappened = false;
+            if(getClickedKachel(kacheln,clickXPos,clickYPos)!=null) {
+                if (!getClickedKachel(kacheln, clickXPos, clickYPos).isWurdeAufgedeckt()) {
+                    getClickedKachel(kacheln, clickXPos, clickYPos).setFlag(true);
+                    invalidate();
+                }
+            }
+        }
+        return true;
     }
         /* Funktion, die das Kachelobjekt zurückgibt, dessen Lage den Klickkoordinaten entspricht
         *  -> wird gebraucht, damit beim Klicken auf eine Kachel eine entsprechende Aktion erfolgen kann*/
@@ -150,4 +180,28 @@ public class Spielfeld extends View {
             }
             return null;
         }
+    /* Initialisieren des Timers*/
+    private void initializeTimer() {
+        countDownTimer = new CountDownTimer(500, 100) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeRemaining = millisUntilFinished;
+            }
+
+            @Override
+            public void onFinish() {
+                timeRemaining = 0;
+                timerRunning=false;
+            }
+        };
+    }
+    public void startTimer() {
+        timerRunning=true;
+        countDownTimer.start();
+    }
+
+    public void stopTimer() {
+        timerRunning=false;
+        countDownTimer.cancel();
+    }
     }
