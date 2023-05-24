@@ -1,20 +1,16 @@
 package de.hsos.cp.newminesweeper;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.view.View;
+
 
 public class Spiel {
-    private Spielfeld spielfeld;
-    private Context context;
 
-    public Spiel(Spielfeld _spielfeld, Context _context){
-        spielfeld = _spielfeld;
-        context = _context;
-    }
-    public void spielen(){
-        spielfeld = new Spielfeld(context);
-        while(true){
-            Kachel kachel = spielfeld.getClickedKachel(spielfeld.getKacheln(), spielfeld.getClickXPos(), spielfeld.getClickYPos());
+    public Spiel(){}
 
-        }
+    public void whatToDo(Kachel kachel){
+
     }
 }

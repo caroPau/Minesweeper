@@ -20,6 +20,7 @@ import java.util.Random;
  *  enthält eine Kachelmatrix und Funktionen zum initialisieren des Spielfelds
  *  zudem wird das TouchEvent und der onClick verarbeitet */
 public class Spielfeld extends View {
+    private Spiel spiel;
 
     /* Matrix mit Kachelobjekten*/
     private Kachel [][] kacheln;
@@ -85,8 +86,20 @@ public class Spielfeld extends View {
         return kacheln;
     }
 
+    public Bar getBar() {
+        return bar;
+    }
+
     public int getMINEN() {
         return MINEN;
+    }
+
+    public int getMinenleft() {
+        return minenleft;
+    }
+
+    public void setMinenleft(int minenleft) {
+        this.minenleft = minenleft;
     }
 
     public float getClickXPos() {
@@ -246,10 +259,7 @@ public class Spielfeld extends View {
         return nachbarn;
     }
 
-    /* Initialisierung des Spielfeldes
-     *  -> es werden Kachelobjekte angelegt und initialisiert*/
-    public void init() {
-        /* Initialisierung Bar */
+    private void initBar(){
         bar = new Bar(getContext());
         bar.getBombCountView().setText(Integer.toString(minenleft));
         bar.setxPosBombCount(0);
@@ -262,8 +272,8 @@ public class Spielfeld extends View {
         bar.setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.newgame), (int)(getBildschirmHoehe()*0.1), (int)(getBildschirmHoehe()*0.1), true));
         bar.setBitmap_Background(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), getBildschirmBreite(), (int)(getBildschirmHoehe()*0.15), true));
         bar.setBitmap_Timer(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), (int)(getBildschirmHoehe()*0.18), (int)(getBildschirmHoehe()*0.15), true));
-
-        /* Initialisierung Kacheln */
+    }
+    private void initKacheln(){
         kacheln = new Kachel[KachelSpalten][KachelZeilen];
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
@@ -286,6 +296,18 @@ public class Spielfeld extends View {
                 }
             }
         }
+    }
+
+    public void init() {
+        Spiel spiel = new Spiel();
+        this.setOnClickListener(new Spielfeld.OnClickListener() {
+            @Override
+            public void onClick(View view, float x, float y) {
+                //Hier kann Code ausgeführt werden, wenn ein Click-Event ausgelöst wird
+            }
+        });
+        initBar();
+        initKacheln();
     }
 
     private void rightGraphic(Kachel kachel) {
@@ -373,10 +395,6 @@ public class Spielfeld extends View {
             if (getClickedKachel(kacheln, clickXPos, clickYPos) != null) {
                 if (!getClickedKachel(kacheln, clickXPos, clickYPos).isFlag()) {
                     getClickedKachel(kacheln, clickXPos, clickYPos).setWurdeAufgedeckt(true);
-                    if(getClickedKachel(kacheln, clickXPos, clickYPos).isMine()) {
-                        bar.getBombCountView().setText(Integer.toString(minenleft));
-                        minenleft--;
-                    }
                 } else {
                     getClickedKachel(kacheln, clickXPos, clickYPos).setFlag(false);
                 }
@@ -388,6 +406,8 @@ public class Spielfeld extends View {
             if (getClickedKachel(kacheln, clickXPos, clickYPos) != null) {
                 if (!getClickedKachel(kacheln, clickXPos, clickYPos).isWurdeAufgedeckt()) {
                     getClickedKachel(kacheln, clickXPos, clickYPos).setFlag(true);
+                    minenleft--;
+                    bar.getBombCountView().setText(String.valueOf(minenleft));
                     invalidate();
                 }
             }
