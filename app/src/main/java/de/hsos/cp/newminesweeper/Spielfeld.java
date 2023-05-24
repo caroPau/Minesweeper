@@ -34,6 +34,8 @@ public class Spielfeld extends View {
     private int minenleft = MINEN;
 
     /* onClickListener, um Clicks zu verarbeiten*/
+    private OnTouchDownListener onTouchDownListener;
+    private OnLongClickListener onLongClickListener;
     private OnClickListener onClickListener;
 
     private CountDownTimer countDownTimer;
@@ -53,6 +55,7 @@ public class Spielfeld extends View {
     private int KachelZeilen = 16;
 
     private int KachelSpalten = 10;
+
 
 
     /* Gibt die Bildschirmbreite in Pixeln zurück*/
@@ -131,6 +134,19 @@ public class Spielfeld extends View {
         }
     }
 
+    public ArrayList<Kachel> getNachbarn(Kachel kachel){
+        ArrayList<Kachel> nachbarn = new ArrayList<>();
+        for(int x = kachel.getX() - 1; x <= kachel.getX() + 1; x++){
+            if(x >= 0 && x < getKachelSpalten()) {
+                for (int y = kachel.getY() - 1; y <= kachel.getY() + 1; y++) {
+                    if(y >= 0 && y < getKachelZeilen() && kacheln[x][y] != kachel) {
+                        nachbarn.add(kacheln[x][y]);
+                    }
+                }
+            }
+        }
+        return nachbarn;
+    }
     public int getAnzahlNachbarsminen(Kachel kachel, int x, int y) {
         int nachbarn = 0;
         if (x == 0) {
@@ -261,7 +277,7 @@ public class Spielfeld extends View {
 
     private void initBar(){
         bar = new Bar(getContext());
-        bar.getBombCountView().setText(Integer.toString(minenleft));
+        bar.getBombCountView().setText(String.valueOf(minenleft));
         bar.setxPosBombCount(0);
         bar.setyPosBombCount(0);
         bar.setxPosTimer((int)(getBildschirmBreite()*0.65));
@@ -277,9 +293,9 @@ public class Spielfeld extends View {
         kacheln = new Kachel[KachelSpalten][KachelZeilen];
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
-                kacheln[x][y] = new Kachel();
-                kacheln[x][y].setxPos(x * (kachelbreite()));
-                kacheln[x][y].setyPos((int) (getBildschirmHoehe()*0.15) + y * (kachelbreite()));
+                kacheln[x][y] = new Kachel(x, y);
+                kacheln[x][y].setxPosDraw(x * (kachelbreite()));
+                kacheln[x][y].setyPosDraw((int) (getBildschirmHoehe()*0.15) + y * (kachelbreite()));
                 kacheln[x][y].setBitmap_hidden(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), kachelbreite(), kachelbreite(), true));
                 kacheln[x][y].setBitmap_flag(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.flag), kachelbreite(), kachelbreite(), true));
             }
@@ -300,10 +316,38 @@ public class Spielfeld extends View {
 
     public void init() {
         Spiel spiel = new Spiel();
-        this.setOnClickListener(new Spielfeld.OnClickListener() {
+        this.setOnTouchDownListener(new Spielfeld.OnTouchDownListener() {
             @Override
-            public void onClick(View view, float x, float y) {
-                //Hier kann Code ausgeführt werden, wenn ein Click-Event ausgelöst wird
+            public void onTouchDown(Spielfeld spielfeld, float x, float y) {
+
+            }
+        });
+        this.setOnClickListener(new Spielfeld.OnClickListener(){
+            @Override
+            public void onClick(Spielfeld spielfeld, float x, float y) {
+                if (getClickedKachel(kacheln, x, y) != null) {
+                    if (!getClickedKachel(kacheln, x, y).isFlag()) {
+
+                        spiel.whatToDo(spielfeld, spielfeld.getClickedKachel(kacheln, x, y));
+                    } else {
+                        getClickedKachel(kacheln, x, y).setFlag(false);
+                    }
+
+                    invalidate();
+                }
+            }
+        });
+        this.setOnLongClickListener(new Spielfeld.OnLongClickListener(){
+            @Override
+            public void onLongClick(Spielfeld spielfeld, float x, float y) {
+                if (getClickedKachel(kacheln, x, y) != null) {
+                    if (!getClickedKachel(kacheln, x, y).isWurdeAufgedeckt()) {
+                        getClickedKachel(kacheln, x, y).setFlag(true);
+                        minenleft--;
+                        bar.getBombCountView().setText(String.valueOf(minenleft));
+                        invalidate();
+                    }
+                }
             }
         });
         initBar();
@@ -352,7 +396,7 @@ public class Spielfeld extends View {
         paint.setTextSize((int)(getBildschirmHoehe()*0.075));
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
-                canvas.drawBitmap(kacheln[x][y].getBitmap(), kacheln[x][y].getxPos(), kacheln[x][y].getyPos(), paint);
+                canvas.drawBitmap(kacheln[x][y].getBitmap(), kacheln[x][y].getxPosDraw(), kacheln[x][y].getyPosDraw(), paint);
             }
         }
         canvas.drawBitmap(bar.getBitmap_Background(), 0, 0, paint);
@@ -365,14 +409,28 @@ public class Spielfeld extends View {
     /* Methoden, um den OnClickListener zu unterstützen*/
 
 
+    public void setOnTouchDownListener(OnTouchDownListener onTouchDownListener) {
+        this.onTouchDownListener = onTouchDownListener;
+    }
+
+    public void setOnLongClickListener(OnLongClickListener onLongClickListener) {
+        this.onLongClickListener = onLongClickListener;
+    }
+
     public void setOnClickListener(OnClickListener onClickListener) {
         this.onClickListener = onClickListener;
     }
 
-    public interface OnClickListener {
-        void onClick(View view, float x, float y);
+    public interface OnTouchDownListener {
+        void onTouchDown(Spielfeld spielfeld, float x, float y);
     }
 
+    public interface OnClickListener{
+        void onClick(Spielfeld spielfeld, float x, float y);
+    }
+    public interface OnLongClickListener{
+        void onLongClick(Spielfeld spielfeld, float x, float y);
+    }
 
 
     /* Event, das die Toucheingabe verwaltet */
@@ -385,31 +443,21 @@ public class Spielfeld extends View {
             // Koordinaten des Klicks abrufen
             clickXPos = event.getX(); //X-Koordinate des Klicks
             clickYPos = event.getY(); //Y-Koordinate des Klicks
-            if (onClickListener != null) {
-                onClickListener.onClick(this, clickXPos, clickYPos); // Koordinaten an den OnClickListener übergeben
+            if (onTouchDownListener != null) {
+                onTouchDownListener.onTouchDown(this, clickXPos, clickYPos); // Koordinaten an den OnClickListener übergeben
             }
         }
         if (action == MotionEvent.ACTION_UP && timerRunning) {
             stopTimer();
             actionDownHappened = false;
-            if (getClickedKachel(kacheln, clickXPos, clickYPos) != null) {
-                if (!getClickedKachel(kacheln, clickXPos, clickYPos).isFlag()) {
-                    getClickedKachel(kacheln, clickXPos, clickYPos).setWurdeAufgedeckt(true);
-                } else {
-                    getClickedKachel(kacheln, clickXPos, clickYPos).setFlag(false);
-                }
-                invalidate();
+            if(onClickListener != null){
+                onClickListener.onClick(this, clickXPos, clickYPos);
             }
         }
         if (actionDownHappened && !timerRunning) {
             actionDownHappened = false;
-            if (getClickedKachel(kacheln, clickXPos, clickYPos) != null) {
-                if (!getClickedKachel(kacheln, clickXPos, clickYPos).isWurdeAufgedeckt()) {
-                    getClickedKachel(kacheln, clickXPos, clickYPos).setFlag(true);
-                    minenleft--;
-                    bar.getBombCountView().setText(String.valueOf(minenleft));
-                    invalidate();
-                }
+            if(onLongClickListener != null){
+                onLongClickListener.onLongClick(this, clickXPos, clickYPos);
             }
         }
         return true;
@@ -420,8 +468,8 @@ public class Spielfeld extends View {
     public Kachel getClickedKachel(Kachel[][] kacheln, float xpos, float ypos) {
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
-                if (xpos >= kacheln[x][y].getxPos() && xpos <= kacheln[x][y].getxPos() + kachelbreite()
-                        && ypos >= kacheln[x][y].getyPos() && ypos <= kacheln[x][y].getyPos() + kachelbreite()) {    //Bounding Box
+                if (xpos >= kacheln[x][y].getxPosDraw() && xpos <= kacheln[x][y].getxPosDraw() + kachelbreite()
+                        && ypos >= kacheln[x][y].getyPosDraw() && ypos <= kacheln[x][y].getyPosDraw() + kachelbreite()) {    //Bounding Box
                     return kacheln[x][y];
                 }
             }
