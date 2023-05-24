@@ -1,4 +1,4 @@
-package de.hsos.cp.newminesweeper;
+package de.hsos.cp.newminesweeper.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -120,15 +120,6 @@ public class Bar {
         return BombCountView;
     }
 
-    public void setBombCountView(TextView bombCountView) {
-        BombCountView = bombCountView;
-    }
 
-    public TextView getTimerView() {
-        return TimerView;
-    }
 
-    public void setTimerView(TextView timerView) {
-        TimerView = timerView;
-    }
 }

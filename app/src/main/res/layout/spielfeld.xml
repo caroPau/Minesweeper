@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<de.hsos.cp.newminesweeper.Spielfeld
+<de.hsos.cp.newminesweeper.ui.Spielfeld
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-</de.hsos.cp.newminesweeper.Spielfeld>
+</de.hsos.cp.newminesweeper.ui.Spielfeld>

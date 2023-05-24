@@ -1,16 +1,10 @@
 package de.hsos.cp.newminesweeper;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ToggleButton;
 
-import java.util.Scanner;
+import de.hsos.cp.newminesweeper.ui.Spielfeld;
 
 public class MainActivity extends AppCompatActivity {
     private Spielfeld spielfeld;

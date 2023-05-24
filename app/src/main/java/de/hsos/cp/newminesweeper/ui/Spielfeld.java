@@ -1,4 +1,4 @@
-package de.hsos.cp.newminesweeper;
+package de.hsos.cp.newminesweeper.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -15,19 +15,22 @@ import android.os.CountDownTimer;
 import java.util.ArrayList;
 import java.util.Random;
 
+import de.hsos.cp.newminesweeper.R;
+import de.hsos.cp.newminesweeper.logic.Spiel;
+
 /* Spielfeld-Klasse
  *  Custom View, auf dem die Kacheln abgebildet werden
  *  enthält eine Kachelmatrix und Funktionen zum initialisieren des Spielfelds
  *  zudem wird das TouchEvent und der onClick verarbeitet */
 public class Spielfeld extends View {
-    private Spiel spiel;
 
     /* Matrix mit Kachelobjekten*/
-    private Kachel [][] kacheln;
+    private Kachel[][] kacheln;
+    private Grafik grafik;
 
     private Bar bar;
     /* Paint objekt für die onDraw()-Methode*/
-    private Paint paint = new Paint();
+    private final Paint paint = new Paint();
 
     private final int MINEN = 20;
 
@@ -52,27 +55,22 @@ public class Spielfeld extends View {
 
     /* Variablen für die Größe des Kachelfelds */
 
-    private int KachelZeilen = 16;
+    private final int KachelZeilen = 16;
 
-    private int KachelSpalten = 10;
+    private final int KachelSpalten = 10;
 
-
+    public int getMinenleft() {
+        return minenleft;
+    }
 
     /* Gibt die Bildschirmbreite in Pixeln zurück*/
-    public static int getBildschirmBreite() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
 
-    /* Gibt die Bildschirmhöhein Pixeln zurück*/
-    public static int getBildschirmHoehe() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
-    }
 
     /* Defaultkonstruktor */
     public Spielfeld(Context context) {
         super(context);
         initializeTimer(); //Initialisierung des Timers
-        init(); //Initialisierung des Spielfelds
+        init();//Initialisierung des Spielfelds
     }
 
     public Spielfeld(Context context, AttributeSet attributeSet) {
@@ -82,7 +80,7 @@ public class Spielfeld extends View {
     }
 
     int kachelbreite() {
-        return getBildschirmBreite() / KachelSpalten;
+        return Grafik.getBildschirmBreite() / KachelSpalten;
     }
 
     public Kachel[][] getKacheln() {
@@ -91,26 +89,6 @@ public class Spielfeld extends View {
 
     public Bar getBar() {
         return bar;
-    }
-
-    public int getMINEN() {
-        return MINEN;
-    }
-
-    public int getMinenleft() {
-        return minenleft;
-    }
-
-    public void setMinenleft(int minenleft) {
-        this.minenleft = minenleft;
-    }
-
-    public float getClickXPos() {
-        return clickXPos;
-    }
-
-    public float getClickYPos() {
-        return clickYPos;
     }
 
     public int getKachelZeilen() {
@@ -147,155 +125,25 @@ public class Spielfeld extends View {
         }
         return nachbarn;
     }
-    public int getAnzahlNachbarsminen(Kachel kachel, int x, int y) {
+    public int getAnzahlNachbarsminen(Kachel kachel) {
         int nachbarn = 0;
-        if (x == 0) {
-            if (kacheln[x + 1][y].isMine()) {
-                nachbarn++;
-            }
-            if (y == 0) {
-                if (kacheln[x][y + 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x + 1][y + 1].isMine()) {
-                    nachbarn++;
-                }
-            } else if (y == KachelZeilen - 1) {
-                if (kacheln[x][y - 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x + 1][y - 1].isMine()) {
-                    nachbarn++;
-                }
-            } else {
-                if (kacheln[x][y - 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x + 1][y - 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x + 1][y + 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x][y + 1].isMine()) {
-                    nachbarn++;
-                }
-            }
-        } else if (x == KachelSpalten - 1) {
-            if (kacheln[x - 1][y].isMine()) {
-                nachbarn++;
-            }
-            if (y == 0) {
-                if (kacheln[x - 1][y + 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x][y + 1].isMine()) {
-                    nachbarn++;
-                }
-            } else if (y == KachelZeilen - 1) {
-                if (kacheln[x - 1][y - 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x][y - 1].isMine()) {
-                    nachbarn++;
-                }
-            } else {
-                if (kacheln[x - 1][y - 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x][y - 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x - 1][y + 1].isMine()) {
-                    nachbarn++;
-                }
-                if (kacheln[x][y + 1].isMine()) {
-                    nachbarn++;
-                }
-            }
-        }else if(y == 0 && x != KachelSpalten - 1 ) {
-            if (kacheln[x - 1][y].isMine()) {
-                nachbarn++;
-            }
-            if (kacheln[x - 1][y + 1].isMine()) {
-                nachbarn++;
-            }
-            if(kacheln[x][y + 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x + 1][y + 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x + 1][y].isMine()){
-                nachbarn++;
-            }
-        }else if(y == KachelZeilen - 1){
-            if(kacheln[x - 1][y].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x - 1][y - 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x][y - 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x + 1][y - 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x + 1][y].isMine()){
-                nachbarn++;
-            }
-        }
-        else{
-            if(kacheln[x - 1][y - 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x][y - 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x + 1][y - 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x + 1][y].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x + 1][y + 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x][y + 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x - 1][y + 1].isMine()){
-                nachbarn++;
-            }
-            if(kacheln[x - 1][y].isMine()){
+        ArrayList<Kachel> nachbarArr = new ArrayList<Kachel>();
+        nachbarArr = getNachbarn(kachel);
+        for(Kachel k : nachbarArr){
+            if(k.isMine()){
                 nachbarn++;
             }
         }
         return nachbarn;
     }
 
-    private void initBar(){
-        bar = new Bar(getContext());
-        bar.getBombCountView().setText(String.valueOf(minenleft));
-        bar.setxPosBombCount(0);
-        bar.setyPosBombCount(0);
-        bar.setxPosTimer((int)(getBildschirmBreite()*0.65));
-        bar.setyPosTimer(0);
-        bar.setxPosNewGame((int)(getBildschirmBreite()*0.4));
-        bar.setyPosNewGame((int)(getBildschirmHoehe()*0.026));
-        bar.setBitmap_BombCount(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), (int)(getBildschirmHoehe()*0.18), (int)(getBildschirmHoehe()*0.15), true));
-        bar.setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.newgame), (int)(getBildschirmHoehe()*0.1), (int)(getBildschirmHoehe()*0.1), true));
-        bar.setBitmap_Background(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), getBildschirmBreite(), (int)(getBildschirmHoehe()*0.15), true));
-        bar.setBitmap_Timer(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), (int)(getBildschirmHoehe()*0.18), (int)(getBildschirmHoehe()*0.15), true));
-    }
     private void initKacheln(){
         kacheln = new Kachel[KachelSpalten][KachelZeilen];
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
                 kacheln[x][y] = new Kachel(x, y);
                 kacheln[x][y].setxPosDraw(x * (kachelbreite()));
-                kacheln[x][y].setyPosDraw((int) (getBildschirmHoehe()*0.15) + y * (kachelbreite()));
+                kacheln[x][y].setyPosDraw((int) (Grafik.getBildschirmHoehe()*0.15) + y * (kachelbreite()));
                 kacheln[x][y].setBitmap_hidden(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), kachelbreite(), kachelbreite(), true));
                 kacheln[x][y].setBitmap_flag(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.flag), kachelbreite(), kachelbreite(), true));
             }
@@ -307,15 +155,20 @@ public class Spielfeld extends View {
                     kacheln[x][y].setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_bomb), kachelbreite(), kachelbreite(), true));
 
                 } else {
-                    kacheln[x][y].setAnzahlMinenNachbarn(getAnzahlNachbarsminen(kacheln[x][y], x, y));
-                    rightGraphic(kacheln[x][y]);
+                    kacheln[x][y].setAnzahlMinenNachbarn(getAnzahlNachbarsminen(kacheln[x][y]));
+                    grafik.rightGraphic(kacheln[x][y]);
                 }
             }
         }
     }
 
     public void init() {
-        Spiel spiel = new Spiel();
+        Spiel spiel = new Spiel(this);
+        bar = new Bar(getContext());
+        grafik = new Grafik(this);
+        grafik.initBar(bar);
+        initKacheln();
+
         this.setOnTouchDownListener(new Spielfeld.OnTouchDownListener() {
             @Override
             public void onTouchDown(Spielfeld spielfeld, float x, float y) {
@@ -328,7 +181,7 @@ public class Spielfeld extends View {
                 if (getClickedKachel(kacheln, x, y) != null) {
                     if (!getClickedKachel(kacheln, x, y).isFlag()) {
 
-                        spiel.whatToDo(spielfeld, spielfeld.getClickedKachel(kacheln, x, y));
+                        spiel.whatToDo(spielfeld.getClickedKachel(kacheln, x, y));
                     } else {
                         getClickedKachel(kacheln, x, y).setFlag(false);
                     }
@@ -350,42 +203,9 @@ public class Spielfeld extends View {
                 }
             }
         });
-        initBar();
-        initKacheln();
     }
 
-    private void rightGraphic(Kachel kachel) {
-        switch (kachel.getAnzahlMinenNachbarn()) {
-            case 0:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_0), kachelbreite(), kachelbreite(), true));
-                break;
-            case 1:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_1), kachelbreite(), kachelbreite(), true));
-                break;
-            case 2:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_2), kachelbreite(), kachelbreite(), true));
-                break;
-            case 3:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_3), kachelbreite(), kachelbreite(), true));
-                break;
-            case 4:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_4), kachelbreite(), kachelbreite(), true));
-                break;
-            case 5:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_5), kachelbreite(), kachelbreite(), true));
-                break;
-            case 6:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_6), kachelbreite(), kachelbreite(), true));
-                break;
-            case 7:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_7), kachelbreite(), kachelbreite(), true));
-                break;
-            case 8:
-                kachel.setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_8), kachelbreite(), kachelbreite(), true));
-                break;
-            default:
-        }
-    }
+
 
     /* In der onDraw Methode werden die Kachelobjekte gezeichnet*/
     @Override
@@ -393,7 +213,7 @@ public class Spielfeld extends View {
         super.onDraw(canvas);
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.FILL);
-        paint.setTextSize((int)(getBildschirmHoehe()*0.075));
+        paint.setTextSize((int)(Grafik.getBildschirmHoehe()*0.075));
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
                 canvas.drawBitmap(kacheln[x][y].getBitmap(), kacheln[x][y].getxPosDraw(), kacheln[x][y].getyPosDraw(), paint);
@@ -403,7 +223,7 @@ public class Spielfeld extends View {
         canvas.drawBitmap(bar.getBitmap_NewGame(), bar.getxPosNewGame(), bar.getyPosNewGame(), paint);
         canvas.drawBitmap(bar.getBitmap_BombCount(), bar.getxPosBombCount(), bar.getyPosBombCount(), paint);
         canvas.drawBitmap(bar.getBitmap_Timer(), bar.getxPosTimer(), bar.getyPosTimer(), paint);
-        canvas.drawText(bar.getBombCountView().getText().toString(),(int)(getBildschirmBreite()*0.095),(int)(getBildschirmHoehe()*0.098),paint);
+        canvas.drawText(bar.getBombCountView().getText().toString(),(int)(Grafik.getBildschirmBreite()*0.095),(int)(Grafik.getBildschirmHoehe()*0.098),paint);
     }
 
     /* Methoden, um den OnClickListener zu unterstützen*/
@@ -438,6 +258,7 @@ public class Spielfeld extends View {
         int action = event.getAction();
 
         if (action == MotionEvent.ACTION_DOWN) {
+            performClick();
             startTimer();
             actionDownHappened = true;
             // Koordinaten des Klicks abrufen
@@ -464,6 +285,11 @@ public class Spielfeld extends View {
     }
     /* Funktion, die das Kachelobjekt zurückgibt, dessen Lage den Klickkoordinaten entspricht
      *  -> wird gebraucht, damit beim Klicken auf eine Kachel eine entsprechende Aktion erfolgen kann*/
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
 
     public Kachel getClickedKachel(Kachel[][] kacheln, float xpos, float ypos) {
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
