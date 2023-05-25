@@ -32,16 +32,10 @@ public class Spielfeld extends View {
     private boolean timerRunning = false;
     private boolean actionDownHappened = false;
     private long timeRemaining;
-    private float clickXPos;
-    private float clickYPos;
+    private float xPosclick;
+    private float yPosClick;
     private final int KachelZeilen = 8;
     private final int KachelSpalten = 5;
-
-    public int getMinenleft() {
-        return minenleft;
-    }
-
-
 
     public Spielfeld(Context context) {
         super(context);
@@ -55,12 +49,16 @@ public class Spielfeld extends View {
         init();
     }
 
-    int kachelbreite() {
+    public int kachelbreite() {
         return Grafik.getBildschirmBreite() / KachelSpalten;
     }
 
     public Kachel[][] getKacheln() {
         return kacheln;
+    }
+
+    public int getMinenleft() {
+        return minenleft;
     }
 
     public Bar getBar() {
@@ -75,14 +73,18 @@ public class Spielfeld extends View {
         return KachelSpalten;
     }
 
-    private void setMinen(){
+    public void setKacheln(Kachel[][] kacheln) {
+        this.kacheln = kacheln;
+    }
+
+    void verteileMinen(){
         int minen = MINEN;
         Random rand = new Random();
         while(minen!=0){
             int x = rand.nextInt(KachelSpalten);
             int y = rand.nextInt(KachelZeilen);
             if(!kacheln[x][y].isMine()) {
-                kacheln[x][y].setIstMine(true);
+                kacheln[x][y].setMine();
                 minen--;
             }
         }
@@ -113,75 +115,16 @@ public class Spielfeld extends View {
         return nachbarn;
     }
 
-    private void initKacheln(){
-        kacheln = new Kachel[KachelSpalten][KachelZeilen];
-        for (int x = 0; x <= KachelSpalten - 1; ++x) {
-            for (int y = 0; y <= KachelZeilen - 1; ++y) {
-                kacheln[x][y] = new Kachel(x, y);
-                kacheln[x][y].setxPosDraw(x * (kachelbreite()));
-                kacheln[x][y].setyPosDraw((int) (Grafik.getBildschirmHoehe()*0.15) + y * (kachelbreite()));
-                kacheln[x][y].setBitmap_hidden(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.kachel), kachelbreite(), kachelbreite(), true));
-                kacheln[x][y].setBitmap_flag(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.flag), kachelbreite(), kachelbreite(), true));
-            }
-        }
-        setMinen();
-        for (int x = 0; x <= KachelSpalten - 1; ++x) {
-            for (int y = 0; y <= KachelZeilen - 1; ++y) {
-                if (kacheln[x][y].isMine()) {
-                    kacheln[x][y].setBitmap_exposed(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.exposed_bomb), kachelbreite(), kachelbreite(), true));
 
-                } else {
-                    kacheln[x][y].setAnzahlMinenNachbarn(getAnzahlNachbarsminen(kacheln[x][y]));
-                    grafik.rightGraphic(kacheln[x][y]);
-                }
-            }
-        }
-    }
 
     public void init() {
         Spiel spiel = new Spiel(this);
         bar = new Bar(getContext());
         grafik = new Grafik(this);
         grafik.initBar(bar);
-        initKacheln();
+        grafik.initKacheln(this);
+        setListener(spiel);
 
-        this.setOnTouchDownListener(new Spielfeld.OnTouchDownListener() {
-            @Override
-            public void onTouchDown(Spielfeld spielfeld, float x, float y) {
-
-            }
-        });
-        this.setOnClickListener(new Spielfeld.OnClickListener(){
-            @Override
-            public void onClick(Spielfeld spielfeld, float x, float y) {
-                if (getClickedKachel(kacheln, x, y) != null) {
-                    if (!getClickedKachel(kacheln, x, y).isFlag()) {
-
-                        spiel.whatToDo(spielfeld.getClickedKachel(kacheln, x, y));
-                    } else {
-                        getClickedKachel(kacheln, x, y).setFlag(false);
-                    }
-
-                    invalidate();
-                }
-            }
-        });
-        this.setOnLongClickListener(new Spielfeld.OnLongClickListener(){
-            @Override
-            public void onLongClick(Spielfeld spielfeld, float x, float y) {
-                if (getClickedKachel(kacheln, x, y) != null) {
-                    if (!getClickedKachel(kacheln, x, y).isWurdeAufgedeckt()) {
-                        getClickedKachel(kacheln, x, y).setFlag(true);
-                        minenleft--;
-                        bar.getBombCountView().setText(String.valueOf(minenleft));
-                        if(getClickedKachel(kacheln, x, y).istLetzte(spielfeld)){
-                            bar.setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(spielfeld.getResources(), R.drawable.gamewin_smiley), (int)(Grafik.getBildschirmHoehe()*0.1), (int)(Grafik.getBildschirmHoehe()*0.1), true));
-                        }
-                        invalidate();
-                    }
-                }
-            }
-        });
     }
 
     @Override
@@ -197,12 +140,49 @@ public class Spielfeld extends View {
         }
         canvas.drawBitmap(bar.getBitmap_Background(), 0, 0, paint);
         canvas.drawBitmap(bar.getBitmap_NewGame(), bar.getxPosNewGame(), bar.getyPosNewGame(), paint);
-        canvas.drawBitmap(bar.getBitmap_BombCount(), bar.getxPosBombCount(), bar.getyPosBombCount(), paint);
-        canvas.drawBitmap(bar.getBitmap_Timer(), bar.getxPosTimer(), bar.getyPosTimer(), paint);
-        canvas.drawText(bar.getBombCountView().getText().toString(),(int)(Grafik.getBildschirmBreite()*0.095),(int)(Grafik.getBildschirmHoehe()*0.098),paint);
+        canvas.drawBitmap(bar.getBitmap_MineCount(), bar.getxPosMineCount(), bar.getyPosMineCount(), paint);
+        canvas.drawBitmap(bar.getBitmap_BarKachel(), bar.getxPosBarKachel(), bar.getyPosBarKachel(), paint);
+        canvas.drawText(bar.getMineCountView().getText().toString(),(int)(Grafik.getBildschirmBreite()*0.095),(int)(Grafik.getBildschirmHoehe()*0.098),paint);
     }
+    public void setListener(Spiel spiel){
+        this.setOnTouchDownListener(new Spielfeld.OnTouchDownListener() {
+            @Override
+            public void onTouchDown(Spielfeld spielfeld, float x, float y) {
 
-    /* Methoden, um den OnClickListener zu unterstützen*/
+            }
+        });
+        this.setOnClickListener(new Spielfeld.OnClickListener(){
+            @Override
+            public void onClick(Spielfeld spielfeld, float x, float y) {
+                if (getClickedKachel(kacheln, x, y) != null) {
+                    if (!getClickedKachel(kacheln, x, y).isFlag()) {
+
+                        spiel.spielzugHandler(spielfeld.getClickedKachel(kacheln, x, y));
+                    } else {
+                        getClickedKachel(kacheln, x, y).setFlag(false);
+                    }
+
+                    invalidate();
+                }
+            }
+        });
+        this.setOnLongClickListener(new Spielfeld.OnLongClickListener(){
+            @Override
+            public void onLongClick(Spielfeld spielfeld, float x, float y) {
+                if (getClickedKachel(kacheln, x, y) != null) {
+                    if (!getClickedKachel(kacheln, x, y).isExposed()) {
+                        getClickedKachel(kacheln, x, y).setFlag(true);
+                        minenleft--;
+                        bar.getMineCountView().setText(String.valueOf(minenleft));
+                        if(getClickedKachel(kacheln, x, y).istLetzte(spielfeld)){
+                            bar.setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(spielfeld.getResources(), R.drawable.gamewin_smiley), (int)(Grafik.getBildschirmHoehe()*0.1), (int)(Grafik.getBildschirmHoehe()*0.1), true));
+                        }
+                        invalidate();
+                    }
+                }
+            }
+        });
+    }
 
 
     public void setOnTouchDownListener(OnTouchDownListener onTouchDownListener) {
@@ -228,8 +208,6 @@ public class Spielfeld extends View {
         void onLongClick(Spielfeld spielfeld, float x, float y);
     }
 
-
-    /* Event, das die Toucheingabe verwaltet */
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
 
@@ -237,31 +215,27 @@ public class Spielfeld extends View {
             performClick();
             startTimer();
             actionDownHappened = true;
-            // Koordinaten des Klicks abrufen
-            clickXPos = event.getX(); //X-Koordinate des Klicks
-            clickYPos = event.getY(); //Y-Koordinate des Klicks
+            xPosclick = event.getX();
+            yPosClick = event.getY();
             if (onTouchDownListener != null) {
-                onTouchDownListener.onTouchDown(this, clickXPos, clickYPos); // Koordinaten an den OnClickListener übergeben
+                onTouchDownListener.onTouchDown(this, xPosclick, yPosClick);
             }
         }
         if (action == MotionEvent.ACTION_UP && timerRunning) {
             stopTimer();
             actionDownHappened = false;
             if(onClickListener != null){
-                onClickListener.onClick(this, clickXPos, clickYPos);
+                onClickListener.onClick(this, xPosclick, yPosClick);
             }
         }
         if (actionDownHappened && !timerRunning) {
             actionDownHappened = false;
             if(onLongClickListener != null){
-                onLongClickListener.onLongClick(this, clickXPos, clickYPos);
+                onLongClickListener.onLongClick(this, xPosclick, yPosClick);
             }
         }
         return true;
     }
-    /* Funktion, die das Kachelobjekt zurückgibt, dessen Lage den Klickkoordinaten entspricht
-     *  -> wird gebraucht, damit beim Klicken auf eine Kachel eine entsprechende Aktion erfolgen kann*/
-
     @Override
     public boolean performClick() {
         return super.performClick();
@@ -279,7 +253,6 @@ public class Spielfeld extends View {
         return null;
     }
 
-    /* Initialisieren des Timers*/
     private void initializeTimer() {
         countDownTimer = new CountDownTimer(500, 100) {
             @Override

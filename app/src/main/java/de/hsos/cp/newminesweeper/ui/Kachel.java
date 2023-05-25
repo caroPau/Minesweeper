@@ -13,10 +13,10 @@ public class Kachel {
     private Bitmap Bitmap_flag;
     private Bitmap Bitmap_exposed;
 
-    private boolean istMine = false;
-    private boolean wurdeAufgedeckt = false;
+    private boolean isMine = false;
+    private boolean isExposed = false;
     private boolean isFlag = false;
-    private int anzahlMinenNachbarn = 0;
+    private int mineCountNeighbours = 0;
 
     /* Konstruktor */
     public Kachel(int x, int y){
@@ -30,16 +30,16 @@ public class Kachel {
         return y;
     }
     public boolean isMine() {
-        return istMine;
+        return isMine;
     }
-    public boolean isWurdeAufgedeckt() {
-        return wurdeAufgedeckt;
+    public boolean isExposed() {
+        return isExposed;
     }
     public boolean isFlag(){
         return this.isFlag;
     }
-    public int getAnzahlMinenNachbarn() {
-        return anzahlMinenNachbarn;
+    public int getMineCountNeighbours() {
+        return mineCountNeighbours;
     }
     public int getxPosDraw(){
         return xPosDraw;
@@ -58,11 +58,11 @@ public class Kachel {
     public void setBitmap_flag(Bitmap btmp){
         Bitmap_flag = btmp;
     }
-    public void setIstMine(boolean istMine) {
-        this.istMine = istMine;
+    public void setMine() {
+        this.isMine = true;
     }
     public void setWurdeAufgedeckt() {
-        this.wurdeAufgedeckt = true;
+        this.isExposed = true;
     }
     public void setFlag(boolean isFlag){
         this.isFlag = isFlag;
@@ -73,13 +73,13 @@ public class Kachel {
     public void setyPosDraw(int yPosDraw) {
         this.yPosDraw = yPosDraw;
     }
-    public void setAnzahlMinenNachbarn(int anzahlMinenNachbarn) {
-        this.anzahlMinenNachbarn = anzahlMinenNachbarn;
+    public void setMineCountNeighbours(int mineCountNeighbours) {
+        this.mineCountNeighbours = mineCountNeighbours;
     }
 
     public Bitmap getBitmap(){
         Bitmap drawBitmap;
-        if(wurdeAufgedeckt){
+        if(isExposed){
             drawBitmap = Bitmap_exposed;
         } else if (isFlag) {
             drawBitmap = Bitmap_flag;
@@ -90,15 +90,15 @@ public class Kachel {
     }
     /* Methoden */
     public boolean istLetzte(Spielfeld spielfeld){
-        int unaufgedeckt = 0;
+        int hidden = 0;
         for(int x = 0; x < spielfeld.getKachelSpalten(); x++){
             for (int y = 0; y < spielfeld.getKachelZeilen(); y++){
-                if(!spielfeld.getKacheln()[x][y].wurdeAufgedeckt && !spielfeld.getKacheln()[x][y].isFlag){
-                    unaufgedeckt++;
+                if(!spielfeld.getKacheln()[x][y].isExposed && !spielfeld.getKacheln()[x][y].isFlag){
+                    hidden++;
                 }
             }
         }
-       if(unaufgedeckt > 1){
+       if(hidden > 1){
            return false;
        }
        return true;

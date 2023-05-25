@@ -17,7 +17,7 @@ public class Spiel {
         this.spielfeld = spielfeld;
     }
 
-    public void whatToDo(Kachel kachel){
+    public void spielzugHandler(Kachel kachel){
         if(kachel.isMine()){
            mineHandler();
         }
@@ -32,7 +32,7 @@ public class Spiel {
     }
 
 
-    private void kachelnAufdecken(){
+    private void alleKachelnAufdecken(){
         for(int i = 0; i < spielfeld.getKachelSpalten(); i++){
             for(int j = 0; j < spielfeld.getKachelZeilen(); j++){
                 spielfeld.getKacheln()[i][j].setWurdeAufgedeckt();
@@ -40,14 +40,14 @@ public class Spiel {
         }
     }
     private void mineHandler(){
-        kachelnAufdecken();
+        alleKachelnAufdecken();
         spielfeld.getBar().setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(spielfeld.getResources(), R.drawable.gamelost_smiley), (int)(Grafik.getBildschirmHoehe()*0.1), (int)(Grafik.getBildschirmHoehe()*0.1), true));
 
     }
 
     private void aufdecken(Kachel kachel, ArrayList<Kachel>gesehen){
         kachel.setWurdeAufgedeckt();
-        if(kachel.getAnzahlMinenNachbarn() == 0){
+        if(kachel.getMineCountNeighbours() == 0){
             for (Kachel k:spielfeld.getNachbarn(kachel)) {
                 if(!gesehen.contains(k)) {
                     gesehen.add(k);
@@ -56,4 +56,6 @@ public class Spiel {
             }
         }
     }
+
+
 }

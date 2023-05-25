@@ -4,44 +4,43 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.widget.TextView;
 
+
 public class Bar {
 
-    private int xPosBombCount;
+    private int xPosMineCount;
 
-    private int yPosBombCount;
+    private int yPosMineCount;
 
     private int xPosNewGame;
 
     private int yPosNewGame;
 
-    private int xPosTimer;
+    private int xPosBarKachel;
 
-    private int yPosTimer;
+    private int yPosBarKachel;
 
-    private TextView BombCountView;
+    private final TextView MineCountView;
 
-    private TextView TimerView;
 
-    private Bitmap Bitmap_BombCount;
+    private Bitmap Bitmap_MineCount;
 
     private Bitmap Bitmap_NewGame;
 
     private Bitmap Bitmap_Background;
 
-    private Bitmap Bitmap_Timer;
+    private Bitmap Bitmap_BarKachel;
 
 
     public Bar(Context context){
-    BombCountView = new TextView(context);
-    TimerView = new TextView(context);
+        MineCountView = new TextView(context);
     }
 
-    public int getxPosBombCount(){
-        return xPosBombCount;
+    public int getxPosMineCount(){
+        return xPosMineCount;
     }
 
-    public int getyPosBombCount(){
-        return yPosBombCount;
+    public int getyPosMineCount(){
+        return yPosMineCount;
     }
 
     public int getxPosNewGame(){
@@ -52,12 +51,12 @@ public class Bar {
         return yPosNewGame;
     }
 
-    public void setxPosBombCount(int xPosBombCount) {
-        this.xPosBombCount = xPosBombCount;
+    public void setxPosMineCount(int xPosMineCount) {
+        this.xPosMineCount = xPosMineCount;
     }
 
-    public void setyPosBombCount(int yPosBombCount) {
-        this.yPosBombCount = yPosBombCount;
+    public void setyPosMineCount(int yPosMineCount) {
+        this.yPosMineCount = yPosMineCount;
     }
 
     public void setxPosNewGame(int xPosNewGame) {
@@ -68,12 +67,12 @@ public class Bar {
         this.yPosNewGame = yPosNewGame;
     }
 
-    public Bitmap getBitmap_BombCount() {
-        return Bitmap_BombCount;
+    public Bitmap getBitmap_MineCount() {
+        return Bitmap_MineCount;
     }
 
-    public void setBitmap_BombCount(Bitmap bitmap_BombCount) {
-        Bitmap_BombCount = bitmap_BombCount;
+    public void setBitmap_MineCount(Bitmap bitmap_MineCount) {
+        Bitmap_MineCount = bitmap_MineCount;
     }
 
     public Bitmap getBitmap_NewGame() {
@@ -92,32 +91,32 @@ public class Bar {
         Bitmap_Background = bitmap_Background;
     }
 
-    public Bitmap getBitmap_Timer() {
-        return Bitmap_Timer;
+    public Bitmap getBitmap_BarKachel() {
+        return Bitmap_BarKachel;
     }
 
-    public void setBitmap_Timer(Bitmap bitmap_Timer) {
-        Bitmap_Timer = bitmap_Timer;
+    public void setBitmap_BarKachel(Bitmap bitmap_BarKachel) {
+        Bitmap_BarKachel = bitmap_BarKachel;
     }
 
-    public int getxPosTimer() {
-        return xPosTimer;
+    public int getxPosBarKachel() {
+        return xPosBarKachel;
     }
 
-    public void setxPosTimer(int xPosTimer) {
-        this.xPosTimer = xPosTimer;
+    public void setxPosBarKachel(int xPosBarKachel) {
+        this.xPosBarKachel = xPosBarKachel;
     }
 
-    public int getyPosTimer() {
-        return yPosTimer;
+    public int getyPosBarKachel() {
+        return yPosBarKachel;
     }
 
-    public void setyPosTimer(int yPosTimer) {
-        this.yPosTimer = yPosTimer;
+    public void setyPosBarKachel(int yPosBarKachel) {
+        this.yPosBarKachel = yPosBarKachel;
     }
 
-    public TextView getBombCountView() {
-        return BombCountView;
+    public TextView getMineCountView() {
+        return MineCountView;
     }
 
 
