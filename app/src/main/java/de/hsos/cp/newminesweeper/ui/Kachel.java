@@ -90,15 +90,18 @@ public class Kachel {
     }
     /* Methoden */
     public boolean istLetzte(Spielfeld spielfeld){
-        boolean istletzte = true;
+        int unaufgedeckt = 0;
         for(int x = 0; x < spielfeld.getKachelSpalten(); x++){
             for (int y = 0; y < spielfeld.getKachelZeilen(); y++){
-                if(spielfeld.getKacheln()[x][y] != this && !spielfeld.getKacheln()[x][y].wurdeAufgedeckt){
-                    istletzte = false;
+                if(!spielfeld.getKacheln()[x][y].wurdeAufgedeckt && !spielfeld.getKacheln()[x][y].isFlag){
+                    unaufgedeckt++;
                 }
             }
         }
-        return istletzte;
+       if(unaufgedeckt > 1){
+           return false;
+       }
+       return true;
     }
 
 }

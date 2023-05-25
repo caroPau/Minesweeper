@@ -1,7 +1,6 @@
 package de.hsos.cp.newminesweeper.ui;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -18,65 +17,42 @@ import java.util.Random;
 import de.hsos.cp.newminesweeper.R;
 import de.hsos.cp.newminesweeper.logic.Spiel;
 
-/* Spielfeld-Klasse
- *  Custom View, auf dem die Kacheln abgebildet werden
- *  enthält eine Kachelmatrix und Funktionen zum initialisieren des Spielfelds
- *  zudem wird das TouchEvent und der onClick verarbeitet */
 public class Spielfeld extends View {
 
-    /* Matrix mit Kachelobjekten*/
     private Kachel[][] kacheln;
     private Grafik grafik;
-
     private Bar bar;
-    /* Paint objekt für die onDraw()-Methode*/
     private final Paint paint = new Paint();
-
-    private final int MINEN = 20;
-
+    private final int MINEN = 3;
     private int minenleft = MINEN;
-
-    /* onClickListener, um Clicks zu verarbeiten*/
     private OnTouchDownListener onTouchDownListener;
     private OnLongClickListener onLongClickListener;
     private OnClickListener onClickListener;
-
     private CountDownTimer countDownTimer;
-
     private boolean timerRunning = false;
-
     private boolean actionDownHappened = false;
-
     private long timeRemaining;
-
     private float clickXPos;
-
     private float clickYPos;
-
-    /* Variablen für die Größe des Kachelfelds */
-
-    private final int KachelZeilen = 16;
-
-    private final int KachelSpalten = 10;
+    private final int KachelZeilen = 8;
+    private final int KachelSpalten = 5;
 
     public int getMinenleft() {
         return minenleft;
     }
 
-    /* Gibt die Bildschirmbreite in Pixeln zurück*/
 
 
-    /* Defaultkonstruktor */
     public Spielfeld(Context context) {
         super(context);
-        initializeTimer(); //Initialisierung des Timers
-        init();//Initialisierung des Spielfelds
+        initializeTimer();
+        init();
     }
 
     public Spielfeld(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         initializeTimer();
-        init(); //Initialisierung des Spielfelds
+        init();
     }
 
     int kachelbreite() {
@@ -198,6 +174,9 @@ public class Spielfeld extends View {
                         getClickedKachel(kacheln, x, y).setFlag(true);
                         minenleft--;
                         bar.getBombCountView().setText(String.valueOf(minenleft));
+                        if(getClickedKachel(kacheln, x, y).istLetzte(spielfeld)){
+                            bar.setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(spielfeld.getResources(), R.drawable.gamewin_smiley), (int)(Grafik.getBildschirmHoehe()*0.1), (int)(Grafik.getBildschirmHoehe()*0.1), true));
+                        }
                         invalidate();
                     }
                 }
@@ -205,9 +184,6 @@ public class Spielfeld extends View {
         });
     }
 
-
-
-    /* In der onDraw Methode werden die Kachelobjekte gezeichnet*/
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
