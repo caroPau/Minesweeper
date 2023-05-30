@@ -24,15 +24,15 @@ public class Spielfeld extends View {
     private Bar bar;
     private final Paint paint = new Paint();
     private final int MINEN = 3;
-    private int minenleft = MINEN;
+    private int minenLeft = MINEN;
     private OnTouchDownListener onTouchDownListener;
     private OnLongClickListener onLongClickListener;
     private OnClickListener onClickListener;
     private CountDownTimer countDownTimer;
     private boolean timerRunning = false;
+
     private boolean actionDownHappened = false;
-    private long timeRemaining;
-    private float xPosclick;
+    private float xPosClick;
     private float yPosClick;
     private final int KachelZeilen = 8;
     private final int KachelSpalten = 5;
@@ -57,12 +57,16 @@ public class Spielfeld extends View {
         return kacheln;
     }
 
-    public int getMinenleft() {
-        return minenleft;
+    public int getMinenLeft() {
+        return minenLeft;
     }
 
     public Bar getBar() {
         return bar;
+    }
+
+    public Paint getPaint() {
+        return paint;
     }
 
     public int getKachelZeilen() {
@@ -105,7 +109,7 @@ public class Spielfeld extends View {
     }
     public int getAnzahlNachbarsminen(Kachel kachel) {
         int nachbarn = 0;
-        ArrayList<Kachel> nachbarArr = new ArrayList<Kachel>();
+        ArrayList<Kachel> nachbarArr;
         nachbarArr = getNachbarn(kachel);
         for(Kachel k : nachbarArr){
             if(k.isMine()){
@@ -114,8 +118,6 @@ public class Spielfeld extends View {
         }
         return nachbarn;
     }
-
-
 
     public void init() {
         Spiel spiel = new Spiel(this);
@@ -126,23 +128,14 @@ public class Spielfeld extends View {
         setListener(spiel);
 
     }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.FILL);
         paint.setTextSize((int)(Grafik.getBildschirmHoehe()*0.075));
-        for (int x = 0; x <= KachelSpalten - 1; ++x) {
-            for (int y = 0; y <= KachelZeilen - 1; ++y) {
-                canvas.drawBitmap(kacheln[x][y].getBitmap(), kacheln[x][y].getxPosDraw(), kacheln[x][y].getyPosDraw(), paint);
-            }
-        }
-        canvas.drawBitmap(bar.getBitmap_Background(), 0, 0, paint);
-        canvas.drawBitmap(bar.getBitmap_NewGame(), bar.getxPosNewGame(), bar.getyPosNewGame(), paint);
-        canvas.drawBitmap(bar.getBitmap_MineCount(), bar.getxPosMineCount(), bar.getyPosMineCount(), paint);
-        canvas.drawBitmap(bar.getBitmap_BarKachel(), bar.getxPosBarKachel(), bar.getyPosBarKachel(), paint);
-        canvas.drawText(bar.getMineCountView().getText().toString(),(int)(Grafik.getBildschirmBreite()*0.095),(int)(Grafik.getBildschirmHoehe()*0.098),paint);
+        grafik.drawKacheln(this, canvas);
+        grafik.drawBar(this, canvas);
     }
     public void setListener(Spiel spiel){
         this.setOnTouchDownListener(new Spielfeld.OnTouchDownListener() {
@@ -156,12 +149,10 @@ public class Spielfeld extends View {
             public void onClick(Spielfeld spielfeld, float x, float y) {
                 if (getClickedKachel(kacheln, x, y) != null) {
                     if (!getClickedKachel(kacheln, x, y).isFlag()) {
-
                         spiel.spielzugHandler(spielfeld.getClickedKachel(kacheln, x, y));
                     } else {
                         getClickedKachel(kacheln, x, y).setFlag(false);
                     }
-
                     invalidate();
                 }
             }
@@ -172,8 +163,8 @@ public class Spielfeld extends View {
                 if (getClickedKachel(kacheln, x, y) != null) {
                     if (!getClickedKachel(kacheln, x, y).isExposed()) {
                         getClickedKachel(kacheln, x, y).setFlag(true);
-                        minenleft--;
-                        bar.getMineCountView().setText(String.valueOf(minenleft));
+                        minenLeft--;
+                        bar.getMineCountView().setText(String.valueOf(minenLeft));
                         if(getClickedKachel(kacheln, x, y).istLetzte(spielfeld)){
                             bar.setBitmap_NewGame(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(spielfeld.getResources(), R.drawable.gamewin_smiley), (int)(Grafik.getBildschirmHoehe()*0.1), (int)(Grafik.getBildschirmHoehe()*0.1), true));
                         }
@@ -215,23 +206,23 @@ public class Spielfeld extends View {
             performClick();
             startTimer();
             actionDownHappened = true;
-            xPosclick = event.getX();
+            xPosClick = event.getX();
             yPosClick = event.getY();
             if (onTouchDownListener != null) {
-                onTouchDownListener.onTouchDown(this, xPosclick, yPosClick);
+                onTouchDownListener.onTouchDown(this, xPosClick, yPosClick);
             }
         }
         if (action == MotionEvent.ACTION_UP && timerRunning) {
             stopTimer();
             actionDownHappened = false;
             if(onClickListener != null){
-                onClickListener.onClick(this, xPosclick, yPosClick);
+                onClickListener.onClick(this, xPosClick, yPosClick);
             }
         }
         if (actionDownHappened && !timerRunning) {
             actionDownHappened = false;
             if(onLongClickListener != null){
-                onLongClickListener.onLongClick(this, xPosclick, yPosClick);
+                onLongClickListener.onLongClick(this, xPosClick, yPosClick);
             }
         }
         return true;
@@ -241,11 +232,11 @@ public class Spielfeld extends View {
         return super.performClick();
     }
 
-    public Kachel getClickedKachel(Kachel[][] kacheln, float xpos, float ypos) {
+    public Kachel getClickedKachel(Kachel[][] kacheln, float xPos, float yPos) {
         for (int x = 0; x <= KachelSpalten - 1; ++x) {
             for (int y = 0; y <= KachelZeilen - 1; ++y) {
-                if (xpos >= kacheln[x][y].getxPosDraw() && xpos <= kacheln[x][y].getxPosDraw() + kachelbreite()
-                        && ypos >= kacheln[x][y].getyPosDraw() && ypos <= kacheln[x][y].getyPosDraw() + kachelbreite()) {    //Bounding Box
+                if (xPos >= kacheln[x][y].getxPosDraw() && xPos <= kacheln[x][y].getxPosDraw() + kachelbreite()
+                        && yPos >= kacheln[x][y].getyPosDraw() && yPos <= kacheln[x][y].getyPosDraw() + kachelbreite()) {    //Bounding Box
                     return kacheln[x][y];
                 }
             }
@@ -257,12 +248,10 @@ public class Spielfeld extends View {
         countDownTimer = new CountDownTimer(500, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
-                timeRemaining = millisUntilFinished;
             }
 
             @Override
             public void onFinish() {
-                timeRemaining = 0;
                 timerRunning = false;
             }
         };
